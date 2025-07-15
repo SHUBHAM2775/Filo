@@ -63,7 +63,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 1.5rem 2rem 0 0;
+  padding: 1.5rem 2.5rem 0 0; /* increased right padding */
   position: relative;
   z-index: 2;
   min-height: 80px;
@@ -80,6 +80,9 @@
   justify-content: center;
   box-shadow: 2px 2px 0 var(--primary);
   cursor: pointer;
+  margin-left: 0;
+  margin-right: 0.5rem;
+  padding: 0;
 }
 
 .clouds {
@@ -240,19 +243,78 @@
   filter: brightness(1.1);
 }
 
-@keyframes cloud-move {
-  0% { transform: translateX(-10vw); }
-  100% { transform: translateX(110vw); }
+/* Responsive styles */
+@media (max-width: 900px) {
+  #root {
+    padding: 1rem;
+  }
+  .app-container {
+    padding: 0 0.5rem;
+  }
+  .pixel-table-container {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    margin-top: 4rem;
+  }
 }
 
-.clouds svg {
-  animation: cloud-move 60s linear infinite;
-}
-.clouds svg:nth-child(2) {
-  animation-duration: 80s;
-  animation-delay: 10s;
-}
-.clouds svg:nth-child(3) {
-  animation-duration: 100s;
-  animation-delay: 20s;
+@media (max-width: 600px) {
+  #root {
+    padding: 0.5rem;
+  }
+  .app-container {
+    padding: 0;
+  }
+  .header {
+    padding: 1rem 0.7rem 0 0; /* slightly more right padding for mobile */
+    min-height: 56px;
+  }
+  .clouds {
+    height: 100px;
+  }
+  .birds {
+    top: 30px;
+    height: 60px;
+  }
+  .fab {
+    right: 1rem;
+    bottom: 1rem;
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    border-radius: 12px;
+  }
+  .modal {
+    min-width: unset;
+    max-width: 98vw;
+    padding: 1.2rem 0.7rem;
+    border-width: 2px;
+  }
+  .pixel-input {
+    font-size: 0.95rem;
+    padding: 0.5em 0.7em;
+  }
+  .pixel-btn {
+    font-size: 0.95rem;
+    padding: 0.5em 1em;
+  }
+  .pixel-table-container {
+    max-width: 99vw;
+    padding: 0.5rem 0.1rem 0.5rem 0.1rem;
+    margin-top: 2.5rem;
+    border-width: 2px;
+    box-shadow: 0 0 0 2px var(--primary), 4px 4px 0 0 var(--accent);
+  }
+  .pixel-table th, .pixel-table td {
+    font-size: 0.9rem;
+    padding: 0.4em 0.5em;
+    border-width: 1.5px;
+  }
+  .modal-overlay {
+    align-items: flex-start;
+  }
+  .user-icon {
+    margin-left: 0;
+    margin-right: 0.2rem;
+    padding: 0;
+  }
 }

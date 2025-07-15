@@ -7,7 +7,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('filo_auth');
+    const stored = sessionStorage.getItem('filo_auth');
     if (stored) {
       const { user, token } = JSON.parse(stored);
       setUser(user);
@@ -18,13 +18,13 @@ export function AuthProvider({ children }) {
   const login = (user, token) => {
     setUser(user);
     setToken(token);
-    localStorage.setItem('filo_auth', JSON.stringify({ user, token }));
+    sessionStorage.setItem('filo_auth', JSON.stringify({ user, token }));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('filo_auth');
+    sessionStorage.removeItem('filo_auth');
   };
 
   return (

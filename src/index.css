@@ -51,14 +51,59 @@ button:hover {
 }
 
 body.night {
-  --bg: #23243a;
-  --surface: #2d2d3a;
+  --bg: #18192a;
+  --surface: #23243a;
   --primary: #ffe066;
-  --accent: #b3b3e6;
+  --accent: #3a3a5a;
   --cloud: #b3b3e6;
   --bird: #ffe066;
   --font-color: #f5f5f5;
-  background: repeating-linear-gradient(135deg, #23243a 0 20px, #2d2d3a 20px 40px);
+  background: repeating-linear-gradient(135deg, #18192a 0 20px, #23243a 20px 40px);
+}
+
+/* Dark mode enhancements */
+body.night, body.night .modal, body.night .pixel-table-container, body.night .pixel-table, body.night .pixel-btn, body.night .pixel-input, body.night .switch-btn {
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.45) !important;
+  border-color: #444a6d !important;
+}
+body.night .modal {
+  background: linear-gradient(135deg, #23243a 80%, #23243a 100%);
+  border: 2.5px solid #444a6d;
+}
+body.night .pixel-table-container {
+  background: #23243a;
+  border: 2.5px solid #444a6d;
+}
+body.night .pixel-table th, body.night .pixel-table td {
+  background: rgba(40,40,60,0.92);
+  color: #ffe066;
+  border-color: #444a6d;
+}
+body.night .pixel-table th {
+  background: #3a3a5a;
+  color: #ffe066;
+}
+body.night .pixel-btn, body.night .switch-btn {
+  background: #3a3a5a;
+  color: #ffe066;
+  border: 2px solid #ffe066;
+}
+body.night .pixel-btn:hover, body.night .switch-btn:hover {
+  background: #ffe066;
+  color: #23243a;
+}
+body.night .pixel-input {
+  background: #23243a;
+  color: #ffe066;
+  border: 2px solid #ffe066;
+}
+body.night .error-msg {
+  background: #2d2d3a;
+  color: #ffb347;
+  border: 2px solid #ffb347;
+}
+body.night .modal-overlay {
+  background: rgba(10,10,20,0.7);
 }
 
 .pixel-table th, .pixel-table td {

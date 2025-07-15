@@ -2,7 +2,7 @@ import './App.css';
 import { useState, useEffect, useRef } from 'react';
 import { UserIcon } from '@heroicons/react/24/solid';
 import Clouds from './components/Clouds';
-import Birds, { Butterfly } from './components/Birds';
+import Birds from './components/Birds';
 import Fab from './components/Fab';
 import LoginModal from './components/LoginModal';
 import DataTable from './components/DataTable';
@@ -23,19 +23,19 @@ function App() {
   const dropdownRef = useRef();
   const [isNight, setIsNight] = useState(false);
 
-  // Session-based auth: use sessionStorage instead of localStorage
+  // Restore session on mount
   useEffect(() => {
     const stored = sessionStorage.getItem('filo_auth');
     if (stored) {
       const { user, token } = JSON.parse(stored);
       login(user, token);
     }
-    // eslint-disable-next-line
   }, []);
 
-  // Set API base URL from environment variable (for Vercel deployment)
+  // API base URL
   const API_BASE = import.meta.env.VITE_API_URL || '';
 
+  // Fetch user data when logged in
   useEffect(() => {
     if (!user) return setData([]);
     setLoading(true);
@@ -47,6 +47,7 @@ function App() {
       .finally(() => setLoading(false));
   }, [user]);
 
+  // Handle dark/light mode
   useEffect(() => {
     document.documentElement.style.setProperty('--bg', isNight ? '#23243a' : '#aee9f7');
     document.documentElement.style.setProperty('--surface', isNight ? '#2d2d3a' : '#fffbe7');
@@ -58,6 +59,7 @@ function App() {
     document.body.classList.toggle('night', isNight);
   }, [isNight]);
 
+  // Auth handlers
   const handleLogin = async (email, password, isRegister, username) => {
     setLoginError('');
     try {
@@ -72,7 +74,6 @@ function App() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Auth failed');
       if (isRegister) {
-        // After register, auto-login
         await handleLogin(email, password, false);
         return;
       }
@@ -202,6 +203,34 @@ function App() {
             </div>
           )}
         </header>
+        {/* Show login prompt if not logged in and login modal is not open */}
+        {!user && !loginOpen && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '50vh',
+            fontFamily: 'var(--pixel-font)',
+            fontSize: 22,
+            color: 'var(--primary)',
+            letterSpacing: 1,
+            opacity: 0.85,
+          }}>
+            <span style={{
+              background: 'var(--surface)',
+              border: '2px solid var(--primary)',
+              borderRadius: 12,
+              padding: '1.5em 2.5em',
+              boxShadow: '2px 2px 0 var(--primary)',
+              marginTop: 40,
+              marginBottom: 40,
+              textAlign: 'center',
+            }}>
+              Login to start using features
+            </span>
+          </div>
+        )}
         {user && (
           <>
             {loading ? (
