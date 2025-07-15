@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --pixel-font: 'Press Start 2P', cursive;
+  --bg: #aee9f7;
+  --surface: #fffbe7;
+  --primary: #2d2d2d;
+  --accent: #ffb347;
+  --cloud: #fff;
+  --bird: #ff6f61;
+  --font-color: #2d2d2d;
+}
+
+body {
+  font-family: var(--pixel-font);
+  background: var(--bg);
+  color: var(--font-color);
+  margin: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--pixel-font);
+  margin: 0;
+  color: var(--font-color);
+}
+
+button {
+  font-family: var(--pixel-font);
+  background: var(--accent);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 0.5em 1.5em;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--primary);
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: var(--primary);
+  color: var(--accent);
+}
+
+.app-bg {
+  min-height: 100vh;
+  background: linear-gradient(var(--bg), var(--surface));
+  position: relative;
+  overflow-x: hidden;
+}
+
+body.night {
+  --bg: #23243a;
+  --surface: #2d2d3a;
+  --primary: #ffe066;
+  --accent: #b3b3e6;
+  --cloud: #b3b3e6;
+  --bird: #ffe066;
+  --font-color: #f5f5f5;
+  background: repeating-linear-gradient(135deg, #23243a 0 20px, #2d2d3a 20px 40px);
+}
+
+.pixel-table th, .pixel-table td {
+  color: var(--font-color);
+}
