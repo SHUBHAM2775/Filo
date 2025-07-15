@@ -33,6 +33,9 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
 
   const isImage = (url) => url && (url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.gif') || url.endsWith('.webp'));
 
+  // Set API base URL from environment variable (for Vercel deployment)
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()} style={mode === 'view' ? {
@@ -51,9 +54,9 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
             {data?.fileUrl && (
               <div style={{ margin: '24px 0', textAlign: 'center' }}>
                 {isImage(data.fileUrl) ? (
-                  <img src={data.fileUrl} alt="uploaded" style={{ maxWidth: 420, maxHeight: 320, borderRadius: 8, border: '2px solid var(--primary)', marginBottom: 8 }} />
+                  <img src={`${API_BASE}${data.fileUrl}`} alt="uploaded" style={{ maxWidth: 420, maxHeight: 320, borderRadius: 8, border: '2px solid var(--primary)', marginBottom: 8 }} />
                 ) : (
-                  <a href={data.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold', fontSize: 20, padding: '12px 0', display: 'inline-block' }}>
+                  <a href={`${API_BASE}${data.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold', fontSize: 20, padding: '12px 0', display: 'inline-block' }}>
                     Open File
                   </a>
                 )}

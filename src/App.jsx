@@ -33,10 +33,13 @@ function App() {
     // eslint-disable-next-line
   }, []);
 
+  // Set API base URL from environment variable (for Vercel deployment)
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
     if (!user) return setData([]);
     setLoading(true);
-    fetch('/api/data', {
+    fetch(`${API_BASE}/api/data`, {
       headers: { Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}` },
     })
       .then(res => res.json())
@@ -61,7 +64,7 @@ function App() {
       const body = isRegister
         ? JSON.stringify({ email, password, username })
         : JSON.stringify({ email, password });
-      const res = await fetch(`/api/auth/${isRegister ? 'register' : 'login'}`, {
+      const res = await fetch(`${API_BASE}/api/auth/${isRegister ? 'register' : 'login'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
@@ -83,7 +86,7 @@ function App() {
 
   // Add new data
   const handleAdd = async (formData) => {
-    const res = await fetch('/api/data', {
+    const res = await fetch(`${API_BASE}/api/data`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}`,
@@ -107,7 +110,7 @@ function App() {
   // Delete data
   const handleDelete = async id => {
     if (!window.confirm('Delete this item?')) return;
-    const res = await fetch(`/api/data/${id}`, {
+    const res = await fetch(`${API_BASE}/api/data/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}` },
     });
