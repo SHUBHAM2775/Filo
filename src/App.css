@@ -220,27 +220,31 @@
   border-spacing: 0;
   font-family: var(--pixel-font);
   background: var(--surface);
-  box-shadow: 0 0 0 2px var(--primary);
 }
 .pixel-table th, .pixel-table td {
-  border: 2px solid var(--primary);
   padding: 0.75em 1em;
   text-align: left;
   font-size: 1rem;
   background: rgba(255,255,255,0.85);
+  border: none;
 }
 .pixel-table th {
   background: var(--accent);
   color: var(--primary);
-  text-shadow: 1px 1px 0 var(--primary);
+  font-weight: bold;
+}
+.pixel-table tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.pixel-table tbody tr:last-child {
+  border-bottom: none;
 }
 .pixel-row {
   cursor: pointer;
   transition: background 0.2s;
 }
 .pixel-row:hover {
-  background: var(--bg);
-  filter: brightness(1.1);
+  background: var(--accent);
 }
 
 /* Responsive styles */

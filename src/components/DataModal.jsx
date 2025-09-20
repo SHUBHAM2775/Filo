@@ -117,7 +117,9 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
         padding: '3rem 3.5rem',
         alignItems: 'flex-start',
       } : {}}>
-        <h2 style={{ marginBottom: 24, width: '100%', textAlign: 'center', fontSize: 28, fontWeight: 'bold', letterSpacing: 1 }}>{mode === 'view' ? title : (mode === 'add' ? 'Add Data' : 'Edit Data')}</h2>
+        <h2 style={{ marginBottom: 24, width: '100%', textAlign: 'center', fontSize: 28, fontWeight: 'bold', letterSpacing: 1 }}>
+          {mode === 'view' ? title : (mode === 'add' ? 'Add Data' : mode === 'edit' ? 'Edit Data' : 'Data')}
+        </h2>
         {mode === 'view' ? (
           <div style={{ width: '100%' }}>
             <hr style={{ width: '100%', border: '1.5px solid var(--primary)', margin: '0 0 18px 0' }} />
@@ -189,7 +191,7 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
             )}
             {mode !== 'view' && (
               <button type="submit" className="pixel-btn" style={{ width: '100%' }}>
-                {mode === 'add' ? 'Add' : 'Save'}
+                {mode === 'add' ? 'Add' : mode === 'edit' ? 'Save Changes' : 'Save'}
               </button>
             )}
           </form>

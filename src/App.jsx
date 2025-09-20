@@ -7,6 +7,7 @@ import Fab from './components/Fab';
 import LoginModal from './components/LoginModal';
 import DataTable from './components/DataTable';
 import DataModal from './components/DataModal';
+import ConfirmModal from './components/ConfirmModal';
 import { useAuth } from './context/AuthContext';
 import DayNightToggle from './components/DayNightToggle';
 
@@ -22,6 +23,9 @@ function App() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef();
   const [isNight, setIsNight] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [bulkDeleteItems, setBulkDeleteItems] = useState(null);
 
   // Restore session on mount
   useEffect(() => {
@@ -108,15 +112,97 @@ function App() {
     setModalOpen(true);
   };
 
+  // Edit data
+  const handleEdit = item => {
+    setSelected(item);
+    setModalMode('edit');
+    setModalOpen(true);
+  };
+
   // Delete data
-  const handleDelete = async id => {
-    if (!window.confirm('Delete this item?')) return;
-    const res = await fetch(`${API_BASE}/api/data/${id}`, {
+  const handleDelete = async (item) => {
+    setItemToDelete(item);
+    setConfirmOpen(true);
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    
+    const res = await fetch(`${API_BASE}/api/data/${itemToDelete._id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}` },
     });
-    if (res.ok) setData(data.filter(d => d._id !== id));
-    setModalOpen(false);
+    if (res.ok) {
+      setData(data.filter(d => d._id !== itemToDelete._id));
+      // Close modal if the deleted item was being viewed
+      if (selected?._id === itemToDelete._id) {
+        setModalOpen(false);
+        setSelected(null);
+      }
+    }
+    setItemToDelete(null);
+  };
+
+  // Bulk delete handler
+  const handleBulkDelete = (itemsToDelete) => {
+    setBulkDeleteItems(itemsToDelete);
+    setConfirmOpen(true);
+  };
+
+  // Confirm bulk delete
+  const confirmBulkDelete = async () => {
+    if (!bulkDeleteItems || bulkDeleteItems.length === 0) return;
+    
+    try {
+      // Delete all selected items
+      const deletePromises = bulkDeleteItems.map(item => 
+        fetch(`${API_BASE}/api/data/${item._id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}` },
+        })
+      );
+      
+      const results = await Promise.all(deletePromises);
+      const successfulDeletes = results.filter(res => res.ok);
+      
+      if (successfulDeletes.length > 0) {
+        const deletedIds = bulkDeleteItems.slice(0, successfulDeletes.length).map(item => item._id);
+        setData(data.filter(d => !deletedIds.includes(d._id)));
+        
+        // Close modal if any deleted item was being viewed
+        if (selected && deletedIds.includes(selected._id)) {
+          setModalOpen(false);
+          setSelected(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting items:', error);
+    }
+    
+    setBulkDeleteItems(null);
+  };
+
+  // Update data
+  const handleUpdate = async (formData) => {
+    const res = await fetch(`${API_BASE}/api/data/${selected._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}`,
+      },
+      body: JSON.stringify({
+        title: formData.get('title'),
+        content: formData.get('content'),
+        // Note: File updates would need additional handling
+      }),
+    });
+    if (res.ok) {
+      const updatedItem = await res.json();
+      setData(data.map(d => d._id === selected._id ? updatedItem : d));
+      setModalOpen(false);
+      setSelected(null);
+    }
   };
 
   // Dropdown close on outside click
@@ -236,7 +322,13 @@ function App() {
             {loading ? (
               <div style={{ textAlign: 'center', marginTop: 40 }}>Loading...</div>
             ) : (
-              <DataTable data={data} onSelect={handleSelect} />
+              <DataTable 
+                data={data} 
+                onSelect={handleSelect} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                onBulkDelete={handleBulkDelete}
+              />
             )}
           </>
         )}
@@ -253,20 +345,34 @@ function App() {
       />
       <DataModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={modalMode === 'add' ? handleAdd : undefined}
+        onClose={() => {
+          setModalOpen(false);
+          setSelected(null);
+        }}
+        onSave={modalMode === 'add' ? handleAdd : modalMode === 'edit' ? handleUpdate : undefined}
         data={selected}
         mode={modalMode}
       />
-      {user && modalMode === 'view' && selected && (
-        <button
-          className="pixel-btn"
-          style={{ position: 'fixed', left: '50%', bottom: '2rem', transform: 'translateX(-50%)', zIndex: 20 }}
-          onClick={() => handleDelete(selected._id)}
-        >
-          Delete
-        </button>
-      )}
+      
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setItemToDelete(null);
+          setBulkDeleteItems(null);
+        }}
+        onConfirm={bulkDeleteItems ? confirmBulkDelete : confirmDelete}
+        title={bulkDeleteItems ? "Delete Multiple Items" : "Delete Item"}
+        message={
+          bulkDeleteItems 
+            ? `Are you sure you want to delete ${bulkDeleteItems.length} item${bulkDeleteItems.length !== 1 ? 's' : ''}? This action cannot be undone.`
+            : itemToDelete 
+              ? `Are you sure you want to delete "${itemToDelete.title}"? This action cannot be undone.`
+              : ''
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
       </div>
   );
 }
