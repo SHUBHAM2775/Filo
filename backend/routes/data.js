@@ -5,19 +5,18 @@ const User = require('../models/User');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
-// Multer setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
+// Multer setup - store in memory for database storage
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
 });
-const upload = multer({ storage });
 
 // Auth middleware
 function auth(req, res, next) {
@@ -45,16 +44,64 @@ router.get('/:id', auth, async (req, res) => {
   res.json(data);
 });
 
+// Serve file from database
+router.get('/file/:id', auth, async (req, res) => {
+  try {
+    const data = await UserData.findOne({ _id: req.params.id, userId: req.userId });
+    if (!data || !data.fileData) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Set appropriate headers
+    res.set({
+      'Content-Type': data.fileMimeType,
+      'Content-Length': data.fileSize,
+      'Content-Disposition': `inline; filename="${data.fileName}"`
+    });
+
+    // Send file data
+    res.send(data.fileData);
+  } catch (error) {
+    console.error('Error serving file:', error);
+    res.status(500).json({ message: 'Error serving file' });
+  }
+});
+
 // Create data (with file upload)
 router.post('/', auth, upload.single('file'), async (req, res) => {
-  const { title, content } = req.body;
-  let fileUrl = '';
-  if (req.file) {
-    fileUrl = `/uploads/${req.file.filename}`;
+  try {
+    const { title, content } = req.body;
+    
+    const dataFields = { 
+      title, 
+      content, 
+      userId: req.userId 
+    };
+
+    // If file is uploaded, store it in database
+    if (req.file) {
+      dataFields.fileName = req.file.originalname;
+      dataFields.fileData = req.file.buffer;
+      dataFields.fileMimeType = req.file.mimetype;
+      dataFields.fileSize = req.file.size;
+      // Keep fileUrl for backward compatibility - it will point to our new file endpoint
+      dataFields.fileUrl = `/api/data/file/${req.userId}_${Date.now()}`;
+    }
+
+    const data = new UserData(dataFields);
+    await data.save();
+
+    // Update fileUrl with actual document ID
+    if (req.file) {
+      data.fileUrl = `/api/data/file/${data._id}`;
+      await data.save();
+    }
+
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating data:', error);
+    res.status(500).json({ message: 'Error creating data' });
   }
-  const data = new UserData({ title, content, fileUrl, userId: req.userId });
-  await data.save();
-  res.status(201).json(data);
 });
 
 // Update data

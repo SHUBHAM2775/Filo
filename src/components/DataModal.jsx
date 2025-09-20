@@ -13,12 +13,47 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
   const [title, setTitle] = useState(data?.title || '');
   const [content, setContent] = useState(data?.content || '');
   const [file, setFile] = useState(null);
+  const [fileDataUrl, setFileDataUrl] = useState(null);
 
   useEffect(() => {
     setTitle(data?.title || '');
     setContent(data?.content || '');
     setFile(null);
+    setFileDataUrl(null);
   }, [data, open]);
+
+  // Fetch file data when viewing a file
+  useEffect(() => {
+    if (mode === 'view' && data?.fileUrl && data.fileUrl.includes('/api/data/file/')) {
+      const fetchFile = async () => {
+        try {
+          const token = sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : '';
+          const API_BASE = import.meta.env.VITE_API_URL || '';
+          const response = await fetch(`${API_BASE}${data.fileUrl}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            setFileDataUrl(url);
+          }
+        } catch (error) {
+          console.error('Error fetching file:', error);
+        }
+      };
+      fetchFile();
+    }
+
+    // Cleanup object URL
+    return () => {
+      if (fileDataUrl) {
+        URL.revokeObjectURL(fileDataUrl);
+      }
+    };
+  }, [data, mode]);
 
   if (!open) return null;
 
@@ -31,7 +66,43 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
     onSave(formData);
   };
 
-  const isImage = (url) => url && (url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.gif') || url.endsWith('.webp'));
+  const isImage = (fileName, mimeType) => {
+    if (mimeType) {
+      return mimeType.startsWith('image/');
+    }
+    if (fileName) {
+      return fileName.match(/\.(png|jpg|jpeg|gif|webp)$/i);
+    }
+    return false;
+  };
+
+  const handleFileDownload = async () => {
+    if (!data?.fileUrl) return;
+    
+    try {
+      const token = sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : '';
+      const API_BASE = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_BASE}${data.fileUrl}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = data.fileName || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
 
   // Set API base URL from environment variable (for Vercel deployment)
   const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -53,12 +124,32 @@ export default function DataModal({ open, onClose, onSave, data, mode }) {
             {renderFormattedContent(content)}
             {data?.fileUrl && (
               <div style={{ margin: '24px 0', textAlign: 'center' }}>
-                {isImage(data.fileUrl) ? (
-                  <img src={`${API_BASE}${data.fileUrl}`} alt="uploaded" style={{ maxWidth: 420, maxHeight: 320, borderRadius: 8, border: '2px solid var(--primary)', marginBottom: 8 }} />
+                {isImage(data.fileName, data.fileMimeType) && fileDataUrl ? (
+                  <img 
+                    src={fileDataUrl} 
+                    alt={data.fileName || "uploaded"} 
+                    style={{ 
+                      maxWidth: 420, 
+                      maxHeight: 320, 
+                      borderRadius: 8, 
+                      border: '2px solid var(--primary)', 
+                      marginBottom: 8 
+                    }} 
+                  />
                 ) : (
-                  <a href={`${API_BASE}${data.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold', fontSize: 20, padding: '12px 0', display: 'inline-block' }}>
-                    Open File
-                  </a>
+                  <button 
+                    className="pixel-btn"
+                    onClick={handleFileDownload}
+                    style={{ 
+                      color: 'var(--primary)', 
+                      fontSize: 20, 
+                      padding: '12px 24px', 
+                      display: 'inline-block',
+                      marginBottom: 8
+                    }}
+                  >
+                    📁 Download {data.fileName || 'File'}
+                  </button>
                 )}
               </div>
             )}

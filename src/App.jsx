@@ -258,7 +258,7 @@ function App() {
         data={selected}
         mode={modalMode}
       />
-      {modalMode === 'view' && selected && (
+      {user && modalMode === 'view' && selected && (
         <button
           className="pixel-btn"
           style={{ position: 'fixed', left: '50%', bottom: '2rem', transform: 'translateX(-50%)', zIndex: 20 }}
