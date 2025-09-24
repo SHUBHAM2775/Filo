@@ -82,7 +82,7 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
   };
 
   return (
-    <div className="pixel-table-container">
+    <div className="pixel-table-container" style={{ overflow: 'visible' }}>
       {/* Bulk Action Bar */}
       {selectMode && (
         <div style={{
@@ -155,7 +155,7 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
         </div>
       )}
 
-      <table className="pixel-table" ref={tableRef}>
+      <table className="pixel-table" ref={tableRef} style={{ overflow: 'visible' }}>
         <thead>
           <tr>
             {selectMode && (
@@ -205,7 +205,7 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
                 )}
                 <td style={{ cursor: selectMode ? 'pointer' : 'pointer' }}>{item.title}</td>
                 <td style={{ cursor: selectMode ? 'pointer' : 'pointer' }}>{new Date(item.createdAt).toLocaleDateString()}</td>
-                <td style={{ position: 'relative' }}>
+                <td style={{ position: 'relative', overflow: 'visible' }}>
                   <div className="action-menu-wrapper" style={{ 
                     display: 'flex', 
                     justifyContent: 'center', 
@@ -216,6 +216,7 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
                   }}>
                     <button
                       className="menu-button"
+                      data-menu-id={item._id}
                       onClick={(e) => handleMenuToggle(item._id, e)}
                       style={{
                         background: 'var(--surface)',
@@ -251,19 +252,18 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
                       <div
                         className="action-menu"
                         style={{
-                          position: 'fixed',
+                          position: 'absolute',
                           background: 'var(--surface)',
                           border: '2px solid var(--primary)',
                           borderRadius: '8px',
                           boxShadow: '4px 4px 16px rgba(0,0,0,0.3)',
-                          zIndex: 9999,
+                          zIndex: 10000,
                           minWidth: '140px',
-                          overflow: 'hidden',
+                          overflow: 'visible',
                           animation: 'dropdownFadeIn 0.2s ease-out',
-                          left: index >= data.length - 2 ? 'auto' : 'auto',
-                          right: index >= data.length - 2 ? '20px' : 'auto',
-                          top: `${(index + 2) * 50 + 200}px`,
-                          transform: index >= data.length - 2 ? 'translateX(0)' : 'translateX(-50%)',
+                          left: 'calc(100% + 8px)',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
                         }}
                       >
                         <button
