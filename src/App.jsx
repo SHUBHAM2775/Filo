@@ -185,23 +185,47 @@ function App() {
 
   // Update data
   const handleUpdate = async (formData) => {
-    const res = await fetch(`${API_BASE}/api/data/${selected._id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}`,
-      },
-      body: JSON.stringify({
-        title: formData.get('title'),
-        content: formData.get('content'),
-        // Note: File updates would need additional handling
-      }),
-    });
-    if (res.ok) {
-      const updatedItem = await res.json();
-      setData(data.map(d => d._id === selected._id ? updatedItem : d));
-      setModalOpen(false);
-      setSelected(null);
+    try {
+      // Check if there are files to add
+      const hasFiles = formData.getAll('files').length > 0;
+      
+      if (hasFiles) {
+        // Add files to existing data entry
+        const fileRes = await fetch(`${API_BASE}/api/data/${selected._id}/files`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}`,
+          },
+          body: formData, // FormData contains the files
+        });
+        
+        if (fileRes.ok) {
+          const updatedItem = await fileRes.json();
+          setData(data.map(d => d._id === selected._id ? updatedItem : d));
+        }
+      }
+      
+      // Update text content
+      const res = await fetch(`${API_BASE}/api/data/${selected._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem('filo_auth') ? JSON.parse(sessionStorage.getItem('filo_auth')).token : ''}`,
+        },
+        body: JSON.stringify({
+          title: formData.get('title'),
+          content: formData.get('content'),
+        }),
+      });
+      
+      if (res.ok) {
+        const updatedItem = await res.json();
+        setData(data.map(d => d._id === selected._id ? updatedItem : d));
+        setModalOpen(false);
+        setSelected(null);
+      }
+    } catch (error) {
+      console.error('Error updating data:', error);
     }
   };
 

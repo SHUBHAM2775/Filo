@@ -172,13 +172,14 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
               </th>
             )}
             <th>Title</th>
+            <th>Files</th>
             <th>Date</th>
             <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {data.length === 0 ? (
-            <tr><td colSpan={selectMode ? 4 : 3} style={{ textAlign: 'center', color: '#888' }}>No data yet</td></tr>
+            <tr><td colSpan={selectMode ? 5 : 4} style={{ textAlign: 'center', color: '#888' }}>No data yet</td></tr>
           ) : (
             data.map((item, index) => (
               <tr 
@@ -204,6 +205,30 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
                   </td>
                 )}
                 <td style={{ cursor: selectMode ? 'pointer' : 'pointer' }}>{item.title}</td>
+                <td style={{ cursor: selectMode ? 'pointer' : 'pointer', textAlign: 'center' }}>
+                  {(() => {
+                    const fileCount = (item.files && item.files.length) || (item.fileUrl ? 1 : 0);
+                    if (fileCount === 0) {
+                      return <span style={{ opacity: 0.5 }}>—</span>;
+                    }
+                    return (
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        backgroundColor: 'var(--accent)',
+                        border: '1px solid var(--primary)',
+                        borderRadius: '12px',
+                        padding: '2px 8px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        color: 'var(--primary)'
+                      }}>
+                        📎 {fileCount}
+                      </span>
+                    );
+                  })()}
+                </td>
                 <td style={{ cursor: selectMode ? 'pointer' : 'pointer' }}>{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td style={{ position: 'relative', overflow: 'visible' }}>
                   <div className="action-menu-wrapper" style={{ 
@@ -325,7 +350,8 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
         </tbody>
       </table>
       
-      <style jsx>{`
+      <style>
+        {`
         @keyframes dropdownFadeIn {
           from {
             opacity: 0;
@@ -336,7 +362,8 @@ export default function DataTable({ data, onSelect, onEdit, onDelete, onBulkDele
             transform: translateY(0) scale(1);
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 } 

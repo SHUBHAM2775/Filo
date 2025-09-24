@@ -9,8 +9,16 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 // Use CORS with specific origin for Vercel frontend (set via env for flexibility)
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:5174', 
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    process.env.CORS_ORIGIN
+  ].filter(Boolean),
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use('/uploads', express.static(__dirname + '/uploads'));
